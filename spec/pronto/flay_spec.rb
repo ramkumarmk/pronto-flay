@@ -3,10 +3,10 @@ require 'ostruct'
 
 module Pronto
   describe Flay do
-    let(:flay) { Flay.new }
+    let(:flay) { Flay.new(patches, nil) }
 
     describe '#run' do
-      subject { flay.run(patches, nil) }
+      subject { flay.run }
 
       context 'patches are nil' do
         let(:patches) { nil }
@@ -21,6 +21,7 @@ module Pronto
 
     describe '#level' do
       subject { flay.level(hash) }
+      let(:patches) { [] }
       before { ::Flay.any_instance.should_receive(:identical)
                                   .and_return({hash => identical}) }
       let(:hash) { 'test' }

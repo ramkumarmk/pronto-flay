@@ -3,30 +3,28 @@ require 'flay'
 
 module Pronto
   class Flay < Runner
-    def initialize
+    def initialize(patches, _)
       @flay = ::Flay.new
+      super
     end
 
-    def run(patches, _)
+    def run
       return [] unless patches
-
-      ruby_patches = patches.select { |patch| patch.additions > 0 }
-                            .select { |patch| ruby_file?(patch.new_file_full_path) }
 
       files = ruby_patches.map { |patch| File.new(patch.new_file_full_path) }
 
       if files.any?
         @flay.process(*files)
         @flay.analyze
-        messages_for(ruby_patches)
+        messages_for
       else
         []
       end
     end
 
-    def messages_for(ruby_patches)
+    def messages_for
       nodes.map do |node|
-        patch = patch_for_node(ruby_patches, node)
+        patch = patch_for_node(node)
 
         line = patch.added_lines.find do |added_line|
           added_line.new_lineno == node.line
@@ -36,7 +34,7 @@ module Pronto
       end.flatten.compact
     end
 
-    def patch_for_node(ruby_patches, node)
+    def patch_for_node(node)
       ruby_patches.find do |patch|
         patch.new_file_full_path.to_s == node.file.path
       end
